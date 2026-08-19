@@ -1,0 +1,18 @@
+services:
+  # ... tus otros servicios (nginx-proxy-manager, servidor-bd, app-backend) ...
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: always
+    ports:
+      - "3001:3001"
+    volumes:
+      - uptime-kuma-data:/app/data
+    networks:
+      - red-cba
+
+volumes:
+  mysql-data:
+    name: mysql-data
+  uptime-kuma-data:
+    name: uptime-kuma-data
