@@ -9,10 +9,13 @@ services:
     volumes:
       - uptime-kuma-data:/app/data
     networks:
-      - red-cba
+      - red-cba:
+        driver: bridge
 
 volumes:
   mysql-data:
     name: mysql-data
   uptime-kuma-data:
     name: uptime-kuma-data
+
+
