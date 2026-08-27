@@ -2,7 +2,7 @@ name: CI/CD Pipeline API
 
 on:
   push:
-    branches: [ "main" ] # Cambia a "master" si tu rama se llama así
+    branches: [ "main" ]
 
 jobs:
   # JOB 1: Ejecución de Pruebas Unitarias
@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Levantar API localmente con Docker Compose
-        run: docker compose up -d
+        run: docker compose up -d --wait
 
       - name: Configurar Python
         uses: actions/setup-python@v5
@@ -28,7 +28,7 @@ jobs:
 
   # JOB 2: Construcción y Despliegue en la Nube
   build_and_deploy:
-    needs: test # <-- CONDICIÓN: Bloquea el despliegue si 'test' falla
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Obtener código del repositorio
@@ -56,15 +56,3 @@ jobs:
           script: |
             docker compose pull
             docker compose up -d --remove-orphans
-
-            - name: Levantar API localmente con Docker Compose
-        run: docker compose up -d
-
-      # AGREGAR ESTE PASO: Le da tiempo a Node.js y MySQL para inicializarse
-      - name: Esperar a que la API esté lista
-        run: sleep 10
-
-      - name: Configurar entorno de Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
