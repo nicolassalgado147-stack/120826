@@ -1,4 +1,34 @@
 services:
+  app:
+    build: .
+    container_name: app-backend
+    restart: always
+    ports:
+      - "5050:5050"
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=adso_db
+    depends_on:
+      - db
+    networks:
+      - red-cba
+
+  db:
+    image: mysql:8.0
+    container_name: servidor-bd
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: adso_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - red-cba
+
   uptime-kuma:
     image: louislam/uptime-kuma:1
     container_name: uptime-kuma
@@ -8,7 +38,7 @@ services:
     volumes:
       - uptime-kuma-data:/app/data
     networks:
-      - red-cba   # <-- Solo el nombre como texto
+      - red-cba
 
 volumes:
   mysql-data:
@@ -16,7 +46,6 @@ volumes:
   uptime-kuma-data:
     name: uptime-kuma-data
 
-# SECCIÓN GLOBAL (al mismo nivel que services y volumes)
 networks:
   red-cba:
     driver: bridge
