@@ -56,3 +56,15 @@ jobs:
           script: |
             docker compose pull
             docker compose up -d --remove-orphans
+
+            - name: Levantar API localmente con Docker Compose
+        run: docker compose up -d
+
+      # AGREGAR ESTE PASO: Le da tiempo a Node.js y MySQL para inicializarse
+      - name: Esperar a que la API esté lista
+        run: sleep 10
+
+      - name: Configurar entorno de Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
