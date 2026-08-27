@@ -1,26 +1,58 @@
-name: CI/CD Docker Hub
+name: CI/CD Pipeline API
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ] # Cambia a "master" si tu rama se llama así
 
 jobs:
-  build-and-push:
+  # JOB 1: Ejecución de Pruebas Unitarias
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout del código
-        uses: actions/checkout@v3
+      - name: Obtener código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Levantar API localmente con Docker Compose
+        run: docker compose up -d
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Pytest y Requests
+        run: pip install pytest requests
+
+      - name: Ejecutar Pytest
+        run: pytest test_api.py
+
+  # JOB 2: Construcción y Despliegue en la Nube
+  build_and_deploy:
+    needs: test # <-- CONDICIÓN: Bloquea el despliegue si 'test' falla
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener código del repositorio
+        uses: actions/checkout@v4
 
       - name: Iniciar sesión en Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Construir y subir imagen a Docker Hub
-        uses: docker/build-push-action@v4
+      - name: Construir y publicar imagen Docker
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: nicolass1511/app-adso:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/app-adso:latest
+
+      - name: Desplegar en el Servidor vía SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker compose pull
+            docker compose up -d --remove-orphans
