@@ -1,5 +1,4 @@
 services:
-  # ... tus otros servicios (nginx-proxy-manager, servidor-bd, app-backend) ...
   uptime-kuma:
     image: louislam/uptime-kuma:1
     container_name: uptime-kuma
@@ -9,8 +8,7 @@ services:
     volumes:
       - uptime-kuma-data:/app/data
     networks:
-      - red-cba:
-        driver: bridge
+      - red-cba   # <-- Solo el nombre como texto
 
 volumes:
   mysql-data:
@@ -18,4 +16,7 @@ volumes:
   uptime-kuma-data:
     name: uptime-kuma-data
 
-
+# SECCIÓN GLOBAL (al mismo nivel que services y volumes)
+networks:
+  red-cba:
+    driver: bridge
